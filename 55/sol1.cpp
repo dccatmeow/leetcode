@@ -1,5 +1,6 @@
 /*55. Jump Game
-You are given an integer array nums. You are initially positioned at the array's first index, and each element in the array represents your maximum jump length at that position.
+You are given an integer array nums. You are initially positioned at the array's first index, and each element 
+in the array represents your maximum jump length at that position.
 Return true if you can reach the last index, or false otherwise.
 
 Example 1:
@@ -25,18 +26,19 @@ public:
         // 1 have 3
         // 2 have 1
         
-        int j = 0;
+        int last_visited(0);
         while(i<n){
             // for case [0]
             if (i+nums[i] >= n-1){
                 return true;
             }
             int next = i;
-            for (++j; j<=i+nums[i];++j){
+            for (int j=last_visited+1; j<=i+nums[i];++j){
                 if (j+nums[j] > next+nums[next]){
                     next = j;
                 }
             }
+            last_visited = i+nums[i];
             // avoid loop if it stuck at [0] in the middle
             if (i==next){
                 return false;

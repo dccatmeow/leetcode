@@ -52,7 +52,9 @@ public:
                 }else{
                     bucket[j] -= nums[i];
                 }
-                if (bucket[j] == 0) {
+             // with this constraint, bucket looks like XXX000000...
+             // there is no difference between bucket, so if this current bucket does not work with i, the rest of bucket also not gonna work with i
+                if (bucket[j] == 0) { 
                     break;
                 }
             }

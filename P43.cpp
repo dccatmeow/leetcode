@@ -18,45 +18,32 @@ Output: "56088"
 class Solution {
 public:
     string multiply(string num1, string num2) {
-        // calculate each digit by digit and move it to the correct position add up to res
-        int size1 = num1.size();
-        int size2 = num2.size();
-        vector<int> res(size1+size2,0);
-        int pos, sum, carry;
-        for (int i=0; i<size1; ++i){
-            for ( int j=0; j<size2; ++j){
-                //int pos = size1+size2-1 - (size1-1-i) - (size2-1-j);
-                pos = i+j+1;
-                sum = res[pos]+(num1[i]-'0')*(num2[j]-'0');
-                carry = sum/10;
-                res[pos] = sum%10;
-                pos--;
-                // resolve carry
-                while(carry){
-                    sum = res[pos]+carry;
-                    carry = sum/10;
-                    res[pos] = sum%10;
-                    pos--;
-                }
+        int m = num1.size();
+        int n = num2.size();
+        // 0,....m+n stores
+        // res[0], 10*res[1],...,10^(m+n-1)*res[m+n-1];
+        vector<int> res(m+n, 0);
+        // calculate each digit multiplication
+        for (int i=0; i<m; ++i){
+            for (int j=0; j<n; ++j){
+                res[m-1-i+n-1-j] += (num1[i]-'0')*(num2[j]-'0');
             }
         }
-        
-        // convert res to string       
-        string s;
-        bool flag=false;
-        for (auto i:res){
-            if (flag){
-                s.push_back(i+'0');
-                continue;
-            }
-            if (i!=0){
-                flag=true;
-                s.push_back(i+'0');
-            }
+        // calculate res and push carry to upper digit
+        int carry(0);
+        for(int i=0; i<m+n; ++i){
+            res[i] = res[i] + carry;
+            carry = res[i]/10;
+            res[i] = res[i]%10;
         }
-        if (s.empty()){
-            return "0";
+        // resolve when result is 0. At least reserve one digit
+        while (res.size()>1 && res.back() == 0){
+            res.pop_back();
         }
-        return s;
+        string ress{};
+        for (int i = res.size()-1; i>=0; --i){
+            ress.push_back(res[i]+'0');
+        }
+        return ress;
     }
 };

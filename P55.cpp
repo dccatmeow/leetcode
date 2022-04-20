@@ -18,36 +18,26 @@ Explanation: You will always arrive at index 3 no matter what. Its maximum jump 
 class Solution {
 public:
     bool canJump(vector<int>& nums) {
-        int i(0);
-        int n = nums.size();
-        // for example [2 3 1 1 4]
-        // first element can jump to 1 position or 2 position
-        // find which position goes further
-        // 1 have 3
-        // 2 have 1
-        
-        int last_visited(0);
-        while(i<n){
-            // for case [0]
-            if (i+nums[i] >= n-1){
+        int n=nums.size();
+        if (n<=1){
+            return true;
+        }
+        // the range first step can reach
+        int l(0);
+        int r(nums[0]);
+        while(l<r){
+            // current step can reach [l,r]
+            if (r>=n-1){
                 return true;
             }
-            int next = i;
-            for (int j=last_visited+1; j<=i+nums[i];++j){
-                if (j+nums[j] > next+nums[next]){
-                    next = j;
-                }
+            int maxDist(0);
+            for (int k=l; k<=r; ++k){
+                maxDist = max(maxDist, k+nums[k]);
             }
-            last_visited = i+nums[i];
-            // avoid loop if it stuck at [0] in the middle
-            if (i==next){
-                return false;
-            }else{
-                i = next;
-            }
+            // set step for next round
+            l = r;
+            r = maxDist;
         }
-        
         return false;
-        
     }
 };

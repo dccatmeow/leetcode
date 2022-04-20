@@ -25,56 +25,52 @@ Constraints:
 class Solution {
 public:
     vector<vector<string>> solveNQueens(int n) {
-        //back track
-        num = n;
-        vector<string> tmp;
-        bt(tmp);
+        // back track
+        sz = n;
+        vector<string> tmp(n, string(n, '.'));
+        bt(tmp, 0);
         return res;
     }
-    void bt(vector<string>& tmp){
-        if (tmp.size() == num){
-            res.push_back(tmp);
-            return;
+    
+    void bt(vector<string>& v, int i){
+        // find a position in row i for v
+        // exit condition
+        if (i==sz){
+            res.push_back(v);
         }
-        for (int i=0; i<num; ++i){
-            if (!isValid(tmp, i)){
-                continue;
-            }else{
-                // can place a queen
-                string s(num, '.');
-                s[i] = 'Q';
-                tmp.push_back(s);
-                bt(tmp);
-                tmp.pop_back();
+        // iterate through all the j [0,sz)
+        for (int j=0; j<sz; ++j){
+            if(isValid(v, i, j)){
+                v[i][j] = 'Q';
+                bt(v, i+1);
+                v[i][j] = '.';
             }
         }
     }
     
-    bool isValid(vector<string>& tmp,int i){
-        for (int j = tmp.size()-1; j>=0; --j){
-            // string is tmp[j]
-            // up
-            if (tmp[j][i] == 'Q'){
+    bool isValid(vector<string>& v, int i, int j){
+        for (int k=i-1; k>=0; --k){
+            // up direction
+            if (v[k][j] == 'Q'){
                 return false;
             }
-            // left up 
-            int k = i- (tmp.size()-j);
-            if (k>=0 && tmp[j][k] == 'Q'){
+        }
+        for(int k=1; k<=i; ++k){
+            // up left
+            if (j-k>=0 && v[i-k][j-k] == 'Q'){
                 return false;
             }
-            // right up
-            k = i+ (tmp.size() - j);
-            if (k<num && tmp[j][k] == 'Q'){
+            // up right
+            if (j+k<sz && v[i-k][j+k] == 'Q'){
                 return false;
             }
         }
         return true;
     }
     
-    
 private:
     vector<vector<string>> res;
-    int num;
+    int sz;
 };
 
 // time complexity O(N!)     T(N) = O(N2) + N*T(N-1)

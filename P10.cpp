@@ -23,7 +23,7 @@ public:
         // if there is match, dp[i][j]=true;
         vector<vector<bool>> dp(m+1, vector<bool>(n+1, false));
         dp[0][0] = true;
-        // if p is empty dp[x][0] is always false
+        // if p is empty dp[x][0] is always false, default
         // dp[0][x] is true if p is ".*n*", elements are cancelled
         for (int j=2; j<=p.size(); j=j+2){
             // start from second element in p

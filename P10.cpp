@@ -48,6 +48,11 @@ public:
                     }else{
                         // p[j-2] is character
                         // a* at least used one time
+                        // s[...ab] p[...ab*]
+                        // s[....i] p[.....j]
+                        // s[...a] p[...ab*]
+                        // s[...i-1] p[.....j]
+                        // there could be more a or more b, conservatively use dp[i-1][j]
                         if (s[i-1] == p[j-2]){
                             dp[i][j] = dp[i-1][j];
                         }else{

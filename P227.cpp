@@ -7,13 +7,12 @@ You may assume that the given expression is always valid. All intermediate resul
 
 Note: You are not allowed to use any built-in function which evaluates strings as mathematical expressions, such as eval().
 
- 
-
 Example 1:
 
 Input: s = "3+2*2"
 Output: 7
 */
+
 class Solution {
 public:
     int calculate(string s) {
@@ -35,11 +34,14 @@ public:
                 }else if (op=='-'){
                     val = val - num;
                 }else if (op == '*'){
+                    // op is already in stack top
+                    // update stack top
                     auto [tmpc,tmpi]=stk.top();
                     stk.pop();
                     tmpi = tmpi*num;
                     stk.push({tmpc, tmpi});
                 }else if (op == '/'){
+                    // update stack top
                     auto [tmpc,tmpi]=stk.top();
                     stk.pop();
                     tmpi = tmpi/num;
@@ -53,14 +55,18 @@ public:
                 // 1+3*2
                 // op='+', num='3'
                 if (op == '+'|| op=='-'){
+                    // push num and op into stack
                     stk.push({op, num});
                 }else if (op =='*'){
+                    // this op is at stack top
+                    // update stack top as * has higher precedence
                     // 1*3*2, +1 is already in stack, op is first *, c is second *
                     auto [tmpc,tmpi]=stk.top();
                     stk.pop();
                     tmpi = tmpi*num;
                     stk.push({tmpc, tmpi});
                 }else if (op == '/'){
+                    // update stack top
                     auto [tmpc,tmpi]=stk.top();
                     stk.pop();
                     tmpi = tmpi/num;
@@ -71,7 +77,9 @@ public:
                 op = c;
             }
         }
-        // at the end of for loop is a number
+        // at the end of for loop val is a number
+        // stack may not be empty
+        // only +a, +b, -c... in stack
         
         while (!stk.empty()){
             auto [tmpc,tmpi]=stk.top();

@@ -55,10 +55,9 @@ public:
         }
         unordered_map<string, bool> visited;
         // this is the possible next step of 0
-        // when it is at location 0, it can only go to 1 (right) or 3 (down)
         vector<vector<int>> next{
-            {1, 3},
-            {0, 2, 4},
+            {1, 3}, // 0 is at 0 position
+            {0, 2, 4}, // 0 is at 1 position
             {1, 5},
             {0, 4},
             {1, 3, 5},
@@ -71,6 +70,7 @@ public:
         while(!q.empty()){
             int n=q.size();
             for (int i=0; i<n; ++i){
+                // loop through all the posible moves in current position, BFS
                 string e = q.front();
                 q.pop();
                 if (e == target){
@@ -81,9 +81,8 @@ public:
                     int loc = e.find_first_of('0');
                     for(auto pos:next[loc]){
                         auto tmp = e;
-                        char tmpc = tmp[loc];
                         tmp[loc] = tmp[pos];
-                        tmp[pos] = tmpc;
+                        tmp[pos] = '0';
                         q.push(tmp);
                     }
                     visited[e] = true;

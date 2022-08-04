@@ -15,14 +15,16 @@ public:
         // add a number to make last element in nums can be checked by all the logic
         nums.push_back(1002);
         // keep track count of each position
-        // pos[0] is the count of element at first position
+        // pos[0] is the count of element with length 1
+        // pos[1] is count for elements with length 2
+        // pos[2] is count for elements set with length >2
         // e.g. [1,1,2,3]
-        // 1: pos = [0,0,0], count++
-        // 1: pos = [2,0,0]
-        // 2: pos = [1,1,0]
+        // 1: pos = [1,0,0] count of 1 element is 1
+        // 1: pos = [2,0,0] count of 1 elements is 2
+        // 2: pos = [1,1,0] count of 1 element is 1, count of 2 elements is 1
         // [1], [1,2]
         // pos[0] = 1 for [1]
-        // pos[1] = 1 for [1,2]
+        // pos[1] = 1 for [0, 1]
         vector<int> pos(3,0);
         // first move pos[0], then pos[1], if still has extra start a new one
         // because after satisfying the length >=3 restriction
@@ -40,9 +42,9 @@ public:
                     // 3: pos = [1,1,0], count = 1
                     return false;
                 }
-                // calculate next by shift pos
-                // pos[0]   pos[1]   pos[2]
-                //          next[0]  next[1] next[2]
+                // i can fullfil pos[0] and pos[1], so shift pos
+                //          pos[0]   pos[1]   pos[2]
+                // next[0]  next[1] next[2]
                 vector<int> next(3,0);
                 next[1] = pos[0];
                 next[2] = pos[1];
@@ -54,8 +56,7 @@ public:
                 }else{
                     // count can fill pos[2] and more
                     next[2] += pos[2];
-                    // place rest of count in next[0]
-                    next[0] = count - next[1] - next[2];
+                    next[0] = count - pos[0] - pos[1] - pos[2];
                 }
                 pos = move(next);
                 

@@ -15,68 +15,60 @@ Output: 4
 
 */
 
-
 class Solution {
+    using pii = std::pair<int, int>;
 public:
-    using pii = pair<int,int>;
     int orangesRotting(vector<vector<int>>& grid) {
-        int res(0);
-        queue<pii> q;
+        // BFS
+        std::queue<pii> q;
+        int m = grid.size();
+        int n = grid[0].size();
+        int res(0); // count of layers in BFS
         int fresh(0);
-        // find the rotten orange and push into priority queue
+        // first find the rotten orange and push it into queue
+        // count fresh oranges
         for (int i=0; i<grid.size(); ++i){
-            for (int j=0; j<grid[0].size(); ++j){
-                pii p = pii(i,j);
+            for (int j=0; j<grid[0].size();++j){
                 if (grid[i][j] == 2){
-                    q.push(p);
-                }else if (grid[i][j] ==1){
-                    // count fresh tomatoes
+                    q.push(pii(i,j));
+                }else if (grid[i][j] == 1){
                     fresh++;
                 }
             }
         }
-        // loop through all the rotten oranges
+        // loop through each layer using the length of queue
+        vector<pii> w{pii(0,1), pii(0,-1), pii(-1,0), pii(1,0)};
         while(!q.empty()){
-            int n = q.size();
-            bool flagUpdate(false);
-            while(n!=0){
-                auto tmp = q.front();
+            bool freshOrangeAdded = false;
+            int s = q.size();
+            for (int sz=0; sz<s; ++sz){
+                // loop through all the elements in this layer
+                auto [i,j] = q.front();
                 q.pop();
-                int i=tmp.first;
-                int j=tmp.second;
-                n--;
-                if (grid[i][j] == 2){
-                    // visit 4 direction fresh tomatoes
-                    vector<pii> v{
-                        pii(i-1, j),
-                        pii(i+1, j),
-                        pii(i, j-1),
-                        pii(i, j+1)
-                    };
-                    for (auto p:v){
-                        if (p.first>=0 && p.first<grid.size() && p.second>=0 && p.second<grid[0].size()){
-                            if (grid[p.first][p.second] == 1){
-                                grid[p.first][p.second] = 2;
-                                q.push(p);
-                                flagUpdate = true;
-                                fresh--;
-                            }
-                        }
+                for (auto [i1,j1]:w){
+                    i1 += i;
+                    j1 += j;
+                    if (i1 <0 || i1>=m || j1<0 || j1>=n){
+                        continue;
                     }
-                    // visited this rotten orange, mark it as empty, no long need to visit here
-                    grid[i][j] = 0;
+                    if (grid[i1][j1] == 1){
+                        // fresh orange spotted
+                        q.push(pii(i1,j1));
+                        grid[i1][j1] = 0;
+                        fresh--;
+                        freshOrangeAdded = true;
+                    }
                 }
-            } // end of while(n!=0)
-            // this layer has update rotten oranges
-            if (flagUpdate){
+            }
+            if (freshOrangeAdded){
                 res++;
             }
-        } // end of while (q.empty())
+        }
         
-        if (fresh == 0){
-            return res;
-        }else{
+        if (fresh != 0){
             return -1;
         }
+        
+        return res;
     }
 };

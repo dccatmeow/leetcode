@@ -11,43 +11,49 @@ For example, "())", "())(())))" and "(())())))" are balanced, ")()", "()))" and 
 class Solution {
 public:
     int minInsertions(string s) {
-        int res(0);
-        int l(0), r(0);
-        int i(0);
-        while(i!=s.size()){
-            char c = s[i];
-            if (c == '('){
-                l++;
-                i++;
-            }else if (c == ')'){
-                if (l == 0){
-                    if (s[i+1] == ')'){
-                        res++;
-                        i=i+2;
-                    }else{
-                        // case ')('
-                        res = res+2;
-                        i++;
-                    }
+        // left and right count for brackets
+        int l(0), r(0), res(0);
+        for (auto c:s){
+            if (c=='('){
+                // check balance for previous section
+                if (r == 2*l){
+                    r=0;
+                    l=0;
                 }else{
-                    // l!=0
-                    l--;
-                    // previous one cannot be ) without being treated
-                    // so previous one has to be (
-                    // check next one
-                    if (s[i+1] == ')'){
-                        // balance ())
-                        i = i+2;
-                    }else{
-                        // s[i+1] == '('
-                        i++;
-                        // '()('
+                    if (r%2 == 1){
+                        // r is odd number
+                        // compensate r to even number
+                        r++;
                         res++;
+                    }
+                    // it is OK for l>r/2
+                    if (l>r/2){
+                        // remove paired ())
+                        l = l-r/2;
+                        r = 0;
+                    }else if (l<r/2){
+                        // compensate l and add to res
+                        res = res+r/2-l;
+                        l=0;
+                        r=0;
                     }
                 }
+                l++;
+            }else if (c==')'){
+                r++;
             }
         }
-        res = res+l*2;
+        // compensate unbalanced l and r
+        if (r%2 == 1){
+            // odd number
+            r++;
+            res++;
+        }
+        if (r > 2*l){
+            res = res+ r/2 - l;
+        }else if (r<2*l){
+            res = res+ 2*l-r;
+        }
         return res;
     }
 };

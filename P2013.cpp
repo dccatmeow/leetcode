@@ -21,10 +21,13 @@ public:
     
     void add(vector<int> point) {
         int i = point[0]*1001+point[1];
-        //if (!freq.count(i)){
+        // error: if (!freq.count(i)){
+        // use check with 0 because later when we calculate frequency 
+        // it will freq[i]=0 could be added.
+        if (freq[i] == 0) {
             // add new element to m
             m[point[0]].push_back(point[1]);
-        //}
+        }
         // add to freq
         freq[i]++;
     }
@@ -43,11 +46,13 @@ public:
                     int len = abs(point[1]-y);
                     // case 1
                     int x = point[0]+len;
-                    res += freq[x*1001+y] * freq[x*1001+point[1]];
+                    int tmp = freq[x*1001+y] * freq[x*1001+point[1]];
+                    res+= tmp* freq[point[0]*1001+y];
                     // case 2
                     if (point[0]>=len){
                         x = point[0]-len;
-                        res += freq[x*1001+y] * freq[x*1001+point[1]];
+                        tmp= freq[x*1001+y] * freq[x*1001+point[1]];
+                        res+= tmp* freq[point[0]*1001+y];
                     }
                 }
             }

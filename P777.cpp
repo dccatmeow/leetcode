@@ -17,20 +17,19 @@ XRLXXRRLX
 */
 
 class Solution {
+
 public:
     bool canTransform(string start, string end) {
         // XL->LX; RX->XR
         // L can move forward and R can move backward
-        // count all the L and R besides X
-        int count(0);
+        // count l and r for L and R
         int l(0);
         int r(0);
+        // removing X is s and e for start and end
         string s,e;
         int n=start.size();
         for (int i=0; i<n; ++i){
-            if (start[i] =='X'){
-                count++;
-            }else{
+            if (start[i] !='X'){
                 // without 'X'
                 s = s+start[i];
                 if (start[i] == 'L'){
@@ -39,9 +38,7 @@ public:
                     r++;
                 }
             }
-            if (end[i] =='X'){
-                count--;
-            }else {
+            if (end[i] !='X'){
                 e = e+end[i];
                 if (end[i]=='L'){
                     l--;
@@ -60,7 +57,7 @@ public:
                 return false;
             }
         }
-        if (count!=0 || s!=e){
+        if (s!=e){
             // L and R not match
             // without 'X' start and end should be identical
             return false;

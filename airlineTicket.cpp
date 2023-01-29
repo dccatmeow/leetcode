@@ -60,6 +60,7 @@ test_input = [
     "LuigiAir 50.0 Business"
 ]
 */
+
 #include<iostream>
 #include <string>
 #include <sstream>
@@ -99,7 +100,7 @@ float calcFee(Seat s,float dis) override {
     return opCost + dis * 0.5;
 }
 static AirlineCalculator* get(){ // singleton
-    static DeltaCalculator calc;
+    static thread_local DeltaCalculator calc;
     return &calc;
     }
 private:
@@ -113,7 +114,7 @@ float calcFee(Seat s,float dis) override {
     return opCost + dis * 0.75;
 }
 static AirlineCalculator* get(){
-    static UnitedCalculator calc;
+    static thread_local UnitedCalculator calc;
     return &calc;
 }
 private:
@@ -138,7 +139,7 @@ float calcFee(Seat s,float dis) override{
     return 1. * dis;
     }
 static AirlineCalculator* get(){
-    static SouthwestCalculator calc;
+    static thread_local SouthwestCalculator calc;
     return &calc;
 }
 private:
@@ -152,7 +153,7 @@ public:
         return max(opCost, (float)100);
     }
     static AirlineCalculator* get(){
-        static LuigiairCalculator calc;
+        static thread_local LuigiairCalculator calc;
         return &calc;
     }
 private:
@@ -188,7 +189,7 @@ vector<string> parse(string s, char delim){
     return res;
 }
 
-vector<float> processData(vector<string>& ticketData){
+vector<float> calCost(vector<string>& ticketData){
     vector<float> res;
     for(auto &ticket:ticketData){
         vector<string> data = parse(ticket);
@@ -204,10 +205,10 @@ vector<float> processData(vector<string>& ticketData){
 
 int main() {
     vector<string> input{"United 150.0 Premium", "Delta 60.0 Business", "SouthWest 1000.0 Economy", "LuigiAir 50.0 Business"};
-    vector<float> costs = processData(input);
+    vector<float> costs = calCost(input);
     int n=input.size();
     for(int i = 0 ; i < n; i++){
-        cout<< input[i]<<" cost: $"<<costs[i]<<endl;
+        cout<< input[i]<<" The cost: $"<<costs[i]<<endl;
         }
         return 0;
 }

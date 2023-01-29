@@ -59,52 +59,36 @@ test_input = [
     "Southwest 1000.0 Economy",
     "LuigiAir 50.0 Business"
 ]
-
 */
 #include<iostream>
 #include <string>
 #include <sstream>
 #include <algorithm>
 #include <iterator>
-#include <map>
+#include <unordered_map>
 #include <vector>
 
 using namespace std;
-namespace Airfee{
 enum Seat{ eco, pre, bus};
-enum Airline{ delta, united, southwest};
-unordered_map<string, Airline> airlines {{"delta",delta}, {"united",united}, {"southwest",southwest}};
+enum Airline{ delta, united, southwest, luigiair};
+unordered_map<string, Airline> airlines {{"delta",delta}, {"united",united}, {"southwest",southwest}, {"luigiair", luigiair}};
 unordered_map<string, Seat> seats{{"economy",eco}, {"premium",pre}, {"business",bus}};
 
 class AirlineCalculator{
 public:
-static AirlineCalculator* create(Airline air);
+static AirlineCalculator* create(Airline air); // factory pattern
 virtual float calcFee(Seat s, float dis) = 0;
-virtual ~AirlineCalculator() = default;
 protected:
 virtual float getOpCost (Seat s, float dis) {
-    float opCost = 0.;
     switch(s){
         case(eco):
-        opCost = getEcoOpCost(dis);
-        break;
+        return 0.;
         case(pre):
-        opCost = getPreOpCost(dis);
-        break;
+        return 25.;
         case(bus):
-        opCost = getBusOpCost(dis);
+        return 50.+0.25*dis;
     }
-    return opCost;
-}
-
-virtual float getEcoOpCost (float d) {
-    return 0.;
-}
-virtual float getPreOpCost (float d) {
-    return 25.;
-}
-virtual float getBusOpCost (float d) {
-    return 50.+ 0.25 * d;
+    return 0;
 }
 };
 
@@ -114,7 +98,7 @@ float calcFee(Seat s,float dis) override {
     float opCost = getOpCost(s,dis);
     return opCost + dis * 0.5;
 }
-static AirlineCalculator* instance(){
+static AirlineCalculator* get(){ // singleton
     static DeltaCalculator calc;
     return &calc;
     }
@@ -128,15 +112,23 @@ float calcFee(Seat s,float dis) override {
     float opCost = getOpCost(s,dis);
     return opCost + dis * 0.75;
 }
-static AirlineCalculator* instance(){
+static AirlineCalculator* get(){
     static UnitedCalculator calc;
     return &calc;
 }
 private:
 UnitedCalculator() = default;
 protected:
-float getPreOpCost(float d) override{
-    return 25. + 0.1 * d;
+float getOpCost(Seat s, float dis) override{
+    switch(s){
+        case(eco):
+        return 0.;
+        case(pre):
+        return 25.+0.1*dis;
+        case(bus):
+        return 50.+0.25*dis;
+    }
+    return 0;
 }
 };
 
@@ -145,7 +137,7 @@ public:
 float calcFee(Seat s,float dis) override{
     return 1. * dis;
     }
-static AirlineCalculator* instance(){
+static AirlineCalculator* get(){
     static SouthwestCalculator calc;
     return &calc;
 }
@@ -153,53 +145,66 @@ private:
 SouthwestCalculator() = default;
 };
 
+class LuigiairCalculator:public AirlineCalculator{
+public:
+    float calcFee(Seat s,float dis) override{
+        float opCost = 2*getOpCost(s,dis);
+        return max(opCost, (float)100);
+    }
+    static AirlineCalculator* get(){
+        static LuigiairCalculator calc;
+        return &calc;
+    }
+private:
+LuigiairCalculator() = default;
+};
 
 
 AirlineCalculator* AirlineCalculator::create(Airline air){
     switch(air){
         case delta:
-        return DeltaCalculator::instance();
+        return DeltaCalculator::get();
         case united:
-        return UnitedCalculator::instance();
+        return UnitedCalculator::get();
         case southwest:
-        return SouthwestCalculator::instance();
+        return SouthwestCalculator::get();
+        case luigiair:
+            return LuigiairCalculator::get();
         }
 }
 
-
-vector<string> split_tolower(string s, char delim = ' ');
-vector<string> split_tolower(string s, char delim){
-vector<string> res;
-std::transform(s.begin(), s.end(), s.begin(), ::tolower);
-std::stringstream ss(s);
-std::string token;
-while (std::getline(ss, token, delim) ) {
-    if(token != "\0")
-res.push_back(token);
+vector<string> parse(string s, char delim = ' ');
+vector<string> parse(string s, char delim){
+    vector<string> res;
+    // switch to lower case
+    std::transform(s.begin(), s.end(), s.begin(), ::tolower);
+    std::stringstream ss(s);
+    std::string token;
+    while (std::getline(ss, token, delim) ) {
+        if(token != "\0"){
+            res.push_back(token);
+        }
+    }
+    return res;
 }
-return res;
-}
 
-//map<string, AirlineCalculator*> airclcs{{"delta",DeltaCalculator::instance()}, {"united",UnitedCalculator::instance()}, {"southwest",SouthwestCalculator::instance()}};
-
-vector<float> processData(vector<string> ticketData){
+vector<float> processData(vector<string>& ticketData){
     vector<float> res;
     for(auto &ticket:ticketData){
-        vector<string> data = split_tolower(ticket);
+        vector<string> data = parse(ticket);
         float dis;
-        dis = stof(data[1]);//100a.0->100.0  
-    
+        // string to float
+        dis = stof(data[1]);
+        // Factory pattern
         AirlineCalculator* clc = AirlineCalculator::create(airlines[data[0]]);
-        //AirlineCalculator* clc = airclcs[data[0]];
         res.push_back(clc->calcFee(seats[data[2]], dis));
     }
     return res;
 }
-}
 
 int main() {
-    vector<string> input{"United 150.0 Premium", "Delta 60.0 Business", "SouthWest 1000.0 Economy"};
-    vector<float> costs = Airfee::processData(input);
+    vector<string> input{"United 150.0 Premium", "Delta 60.0 Business", "SouthWest 1000.0 Economy", "LuigiAir 50.0 Business"};
+    vector<float> costs = processData(input);
     int n=input.size();
     for(int i = 0 ; i < n; i++){
         cout<< input[i]<<" cost: $"<<costs[i]<<endl;

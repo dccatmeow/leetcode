@@ -13,6 +13,9 @@ Given the list of bombs, return the maximum number of bombs that can be detonate
 Example 1:
 Input: bombs = [[2,1,3],[6,1,4]]
 Output: 2
+
+O(V+E) vertices+edges
+
 */
 
 class Solution {

@@ -28,96 +28,62 @@ Output: You guessed the secret word correctly.
  *     int guess(string word);
  * };
  */
+
+/**
+ * // This is the Master's API interface.
+ * // You should not implement it, or speculate about its implementation
+ * class Master {
+ *   public:
+ *     int guess(string word);
+ * };
+ */
 class Solution {
 public:
     void findSecretWord(vector<string>& words, Master& master) {
-        // save matched letter numbers between words[i] and words[j]
-        int m=words.size();
-        vector<vector<int>> matched(m, vector<int>(m, INT_MAX));
-        for (int i=0; i<m; ++i){
-            for (int j=0; j<m; ++j){
-                if (i>j){
-                    // already visited
-                    matched[i][j] = matched[j][i];
-                }else if (i<j){
-                    matched[i][j] = compWords(words[i], words[j]);
-                }   
+        // build graph for words match
+        int n=words.size();
+        vector<vector<int>> g(n, vector<int>(n,0));
+        for (int i=0; i<n; ++i){
+            g[i][i] = 6;
+            for (int j=i; j<n; ++j){
+                int cnt(0);
+                for (int k=0; k<6;++k){
+                    if (words[i][k]==words[j][k]){
+                        ++cnt;
+                    }
+                }
+                g[i][j]=cnt;
+                g[j][i] = cnt;
             }
         }
-        // create a init index vector for all the words
-        vector<int> initIdx(m,0);
-        for (int i=0; i<m; ++i){
-            initIdx[i] = i;
+        // secret words should have same match as tmp
+        unordered_set<int> res;
+        unordered_set<int> tmp;
+        int match = master.guess(words[0]);
+        if (match == 6){
+            return;
         }
-        // find best match words in selectedIdx
-        int bestWordIdx = findBestWordIdx(matched, initIdx);
-        int cnt = 0;
-        while(cnt<30){
-          //**********IMPORTANT******************
-            // select words from pool has same matchGuess as bestWord
-          // secret words is ae
-          // ab ac ae bf
-          // best word = ab 
-          // matchGuess = 1 (ae and ab have same a)
-          // selectedIdx should only include ab ac ae where it has same match 1 (a)
-          // bf and ab has 0 match
-            vector<int> selectedIdx;
-            int matchGuess = master.guess(words[bestWordIdx]);
-            cnt++;
-            if (matchGuess == 6){
+        for (int i=0; i<n; ++i){
+            if (match == g[0][i]){
+                res.insert(i);
+            }
+        }
+
+        while(!res.empty()){
+            int i= *res.begin();
+            match = master.guess(words[i]);
+            if (match == 6){
                 return;
+            }else{
+                res.erase(i);
             }
-            for (auto i:initIdx){
-                if (matched[i][bestWordIdx] == matchGuess){
-                    selectedIdx.push_back(i);
+            for (auto e:res){                
+                if (match == g[e][i]){
+                    tmp.insert(e);
                 }
             }
-            // find best match words in selectedIdx
-            bestWordIdx = findBestWordIdx(matched, selectedIdx);
-            initIdx.clear();
-            initIdx = std::move(selectedIdx);
-            selectedIdx.clear();
+            res.clear();
+            res = std::move(tmp);
         }
-    }
-    
-    int findBestWordIdx(vector<vector<int>>& matched, vector<int>& selectedIdx){
-        int sz = selectedIdx.size();
-        int bestWordIdx = -1;
-        int smallestDiff = INT_MAX;
-        for (int i=0; i<sz; ++i){
-            // diff count for each string compare against other words in the pool 
-            vector<int> diff(6,0);
-            for (int j=0; j<sz; ++j){
-                if (i==j){
-                    continue;
-                }
-                int tmp = matched[selectedIdx[i]][selectedIdx[j]];
-                diff[tmp]++;
-            }
-            // find the max and min in diff
-            int dmax=diff[0];
-            int dmin = dmax;
-            for (auto d:diff){
-                dmax = max(dmax, d);
-                dmin = min(dmin, d);
-            }
-            int tmp = dmax-dmin;
-            if (tmp < smallestDiff){
-                // find new best word index 
-                smallestDiff = tmp;
-                bestWordIdx = selectedIdx[i];
-            }
-        }
-        return bestWordIdx;
-    }
-    
-    int compWords(const string& s1, const string& s2){
-        int res(0);
-        for (int i=0; i<6; ++i){
-            if (s1[i]==s2[i]){
-                res++;
-            }
-        }
-        return res;
     }
 };

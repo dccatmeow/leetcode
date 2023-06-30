@@ -35,59 +35,42 @@ The height of the tree is 2 (The path 1 -> 3 -> 2).
  *     TreeNode(int x, TreeNode *left, TreeNode *right) : val(x), left(left), right(right) {}
  * };
  */
-
-// DFS to traverse and create a memory for fast checking. data structure is important
-// at each level, loop through all the nodes and find the max.
 class Solution {
     using pii = pair<int,int>;
 public:
     vector<int> treeQueries(TreeNode* root, vector<int>& queries) {
+        maxh = 0;
+        preTrav(root, 0);
+        maxh = 0;
+        postTrav(root,0);
         vector<int> res;
-        // set all the depth from current to end
-        traverse(root, 0);
-        // sort by height for each level
-        for (auto& elem:level){
-            sort(elem.second.begin(), elem.second.end(), greater());
-        }
-
-        for (auto i:queries){
-            auto lv = m[i];
-            int tmp = lv-1;// for i the height is level-1
-            for (int j=0; j<level[lv].size(); ++j){
-                auto [h, e] = level[lv][j];
-                if (e!=i){
-                    tmp = max(tmp, h+lv);
-                }else{
-                    // check one more pair before jump out
-                    if (j<level[lv].size()-1){
-                        j++;
-                        auto [h,e] = level[lv][j];
-                        tmp = max(tmp, h+lv);
-                        break;
-                    }
-                }
-            }
-            res.push_back(tmp);
+        for (int q:queries){
+            res.push_back(max(preh[q], posth[q]));
         }
         return res;
     }
 
-    int traverse(TreeNode* node, int lv){
-        if (node == nullptr){
-            // tree leaf
-            return -1;
-        }else{
-            // traverse children tree
-            int h = 1+max(traverse(node->left, lv+1), traverse(node->right, lv+1));
-            m[node->val] = lv;
-            level[lv].push_back(pii(h, node->val));
-            return h;
+    void preTrav(TreeNode* node, int h){
+        if (!node){
+            return;
         }
+        preh[node->val] = maxh;
+        maxh = max(maxh,h);
+        preTrav(node->left, h+1);
+        preTrav(node->right, h+1);
+    }
+    void postTrav(TreeNode* node, int h){
+        if (!node){
+            return;
+        }
+        
+        posth[node->val] = maxh;
+        maxh = max(maxh,h);
+        postTrav(node->right, h+1);
+        postTrav(node->left, h+1);
     }
 
 private:
-    // key TreeNode->val, pii(level from root to node)
-    unordered_map<int,int> m;
-    // level[0] = pii(height,root), level[1]= root->left, root->right
-    unordered_map<int, vector<pii>> level;
+    int maxh;
+    int preh[100001], posth[100001];
 };

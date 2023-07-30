@@ -13,61 +13,58 @@ Input: s = "ADOBECODEBANC", t = "ABC"
 Output: "BANC"
 Explanation: The minimum window substring "BANC" includes 'A', 'B', and 'C' from string t.
 */
-
 class Solution {
 public:
     string minWindow(string s, string t) {
-        // sliding window
-        int s_sz = s.size();
-        int t_sz = t.size();
-        if (s_sz<t_sz){
-            return "";
-        }
-        int left(0);
-        int right(0);
-        // store char in t to m_t
-        // if find string in s that is also in t
-        // store it in m_s
-        unordered_map<char,int> m_s;
-        unordered_map<char, int> m_t;
+        unordered_map<char,int> m;
         for (auto c:t){
-            m_t[c]++;
+            m[c]++;
         }
-        
-        int count(0);
-        string res("");
-        while(right!=s_sz){
-            char rtmp=s[right];
-            if (m_t.count(rtmp)){
-                m_s[rtmp]++;
-                if (m_s[rtmp] == m_t[rtmp]){
-                    // first time meet criteria
-                    count++;
+        int l(0);
+        int n=s.size();
+        std::pair<int,int> res = std::pair<int,int>(0,INT_MAX);
+        int cnt(t.size());
+        for (int r=0; r<n; ++r){
+            if (m.find(s[r])==m.end()){
+                continue;
+            }else{
+                m[s[r]]--;
+                if (m[s[r]]>=0){
+                    cnt--;
                 }
-            }
-            if (count==m_t.size()){
-                // find a solution
-                while(count==m_t.size()){
-                    // narrow down left boundary
-                    char ltmp = s[left];
-                    if (m_t.count(ltmp)){
-                        // update map m_s
-                        m_s[ltmp]--;
-                        if (m_s[ltmp] < m_t[ltmp]){
-                            // current left is the boundary, should be included
-                            count--;
+                if (cnt==0){
+                    // try to move left side
+                    // [l,r]
+                    while(l<r && cnt==0){
+                        if (m.find(s[l])==m.end()){
+                            l++;
+                        }else{
+                            // s[l] in m
+                            if (m[s[l]]==0){
+                                // trigger cnt
+                                break;
+                            }else{
+                                // m[s[l]]<0
+                                m[s[l]]++;
+                                l++;
+                            }
                         }
                     }
-                    left++;
-                }
-                // [left-1, right]
-                int tmplen = right-(left-1)+1;
-                if (res.empty() || tmplen<res.size()){
-                    res = s.substr(left-1, tmplen);
+                    if (r-l<res.second-res.first){
+                        res.first = l;
+                        res.second = r;
+                    }
+                    // move left
+                    m[s[l]]++;
+                    l++;
+                    cnt++;
                 }
             }
-            right++;
         }
-        return res;
+        if (res.second!=INT_MAX){
+            return s.substr(res.first, res.second-res.first+1);
+        }else{
+            return "";
+        }
     }
 };

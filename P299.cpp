@@ -25,27 +25,28 @@ Explanation: Bulls are connected with a '|' and cows are underlined:
 class Solution {
 public:
     string getHint(string secret, string guess) {
-        int n=secret.size();
-        int bull(0), cow(0);
-        unordered_map<int,int> s;
+        int n = secret.size();
+        int a(0), b(0);
+        unordered_map<char,int> m;
+        unordered_map<char,int> g;
         for (int i=0; i<n; ++i){
+            m[secret[i]]++;
+        }
+        for (int i=0;i<n;++i){
             if (secret[i]==guess[i]){
-                bull++;
-            }
-            int tmp = secret[i]-'a';
-            s[tmp]++;
-        }
-        for (auto e:guess){
-            int i=e-'a';
-            if (s.find(i)!=s.end()){
-                s[i]--;
-                if (s[i]==0){
-                    s.erase(i);
+                a++;
+                g[guess[i]]++;
+            }else{
+                if (m.find(guess[i])!=m.end()){
+                    g[guess[i]]++;
                 }
-                cow++;
             }
         }
-        string res = to_string(bull)+"A"+to_string(cow-bull)+"B";
+        for (auto& e:m){
+            b+=min(g[e.first], e.second);
+        }
+        b = b-a;
+        string res = to_string(a)+"A"+to_string(b)+"B";
         return res;
     }
 };

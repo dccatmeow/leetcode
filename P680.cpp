@@ -11,7 +11,7 @@ Example 2:
 Input: s = "abca"
 Output: true
 Explanation: You could delete the character 'c'.
-*?
+*/
 
 class Solution {
 public:

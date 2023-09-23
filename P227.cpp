@@ -12,83 +12,46 @@ Example 1:
 Input: s = "3+2*2"
 Output: 7
 */
-
 class Solution {
 public:
     int calculate(string s) {
-        s.push_back('+');
-        stack<pair<char, int>> stk;
-        int num(0);
+        s = s + '+';
         int val(0);
-        char op('+');
-        for (auto c:s){
-            if (c ==' '){
+        char op = '+';
+        int num(0);
+        for (int i=0; i<s.size();++i){
+            char c = s[i];
+            if (c==' '){
                 continue;
-            }else if (c >= '0' && c<='9'){
-                // number
-                num = num*10 + (c-'0');
-            }else if (c == '+' || c == '-'){
-                // calculate previous op and num to val
-                if(op == '+'){
-                    val = val +num;
-                }else if (op=='-'){
-                    val = val - num;
-                }else if (op == '*'){
-                    // op is already in stack top
-                    // update stack top
-                    auto [tmpc,tmpi]=stk.top();
-                    stk.pop();
-                    tmpi = tmpi*num;
-                    stk.push({tmpc, tmpi});
-                }else if (op == '/'){
-                    // update stack top
-                    auto [tmpc,tmpi]=stk.top();
-                    stk.pop();
-                    tmpi = tmpi/num;
-                    stk.push({tmpc, tmpi});
+            }else if (c>='0'&&c<='9'){
+                num = num*10+(c-'0');
+            }else if (c=='+'||c=='-'){
+                if (op=='+'){
+                    val +=num;
+                }else{
+                    val -= num;
                 }
-                // reset
+                // clear op and num
+                op=c;
                 num=0;
-                op = c;
-            }else if (c=='*' || c=='/'){
-                // push into stk
-                // 1+3*2
-                // op='+', num='3'
-                if (op == '+'|| op=='-'){
-                    // push num and op into stack
-                    stk.push({op, num});
-                }else if (op =='*'){
-                    // this op is at stack top
-                    // update stack top as * has higher precedence
-                    // 1*3*2, +1 is already in stack, op is first *, c is second *
-                    auto [tmpc,tmpi]=stk.top();
-                    stk.pop();
-                    tmpi = tmpi*num;
-                    stk.push({tmpc, tmpi});
-                }else if (op == '/'){
-                    // update stack top
-                    auto [tmpc,tmpi]=stk.top();
-                    stk.pop();
-                    tmpi = tmpi/num;
-                    stk.push({tmpc, tmpi});
-                }
-                // reset
-                num=0;
-                op = c;
-            }
-        }
-        // at the end of for loop val is a number
-        // stack may not be empty
-        // only +a, +b, -c... in stack
-        
-        while (!stk.empty()){
-            auto [tmpc,tmpi]=stk.top();
-            stk.pop();
-            if (tmpc == '+'){
-                val = val + tmpi;
             }else{
-                //'-'
-                val = val-tmpi;
+                // * or /
+                char op2 = c;
+                double num2(0);
+                i++;
+                while(s[i] == ' '){
+                    i++;
+                }
+                while(s[i]>='0'&&s[i]<='9'){
+                    num2 =num2*10+(s[i]-'0');
+                    ++i;
+                }
+                if (op2 == '*'){
+                    num = num * num2;
+                }else{
+                    num = (num/num2);
+                }
+                --i;
             }
         }
         return val;

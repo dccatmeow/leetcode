@@ -39,18 +39,17 @@ public:
         int n=s.size();
         vector<bool> dp(n,false);
         for (int i=0; i<n; ++i){
+            // starting from i to find the word
             if (i==0 || dp[i-1]){
-                // beginning or i-1 exist
+                // update dp for found word
                 auto node = root;
-                for (int j=i; j<n; ++j){
-                    if (node->children.find(s[j])==node->children.end()){
-                        // begin from i does not last till j, no children to iterate
-                        break;
-                    }
-                    node = node->children[s[j]];
+                int j=i;
+                while(j<n && node->children.find(s[j]) != node->children.end()){
+                    node = node->children[s[j]]; 
                     if (node->isWord){
                         dp[j] = true;
                     }
+                    j++;
                 }
             }
         }

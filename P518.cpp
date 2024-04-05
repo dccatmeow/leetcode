@@ -31,8 +31,8 @@ public:
                     // not use coin[i-1]
                     dp[i][j] = dp[i-1][j];
                 }else{
-                    // not use i-1 in coin + 
-                    // use i-1 in coin
+                    // not use i-1 in coin (0,...i-2) + 
+                    // use i-1 in coin, at least 1, same as j = j-coins[i-1]
                     dp[i][j] = dp[i-1][j]+ dp[i][j-coins[i-1]];
                 }
             }

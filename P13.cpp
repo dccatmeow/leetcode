@@ -1,5 +1,5 @@
 /*
-
+13. Roman to Integer
 Roman numerals are represented by seven different symbols: I, V, X, L, C, D and M.
 
 Symbol       Value
@@ -23,48 +23,26 @@ Given a roman numeral, convert it to an integer.
 class Solution {
 public:
     int romanToInt(string s) {
-        int n=s.size();
-        int res(0);
-        for (int i=0; i<n; ++i){
-            char c = s[i];
-            switch(c) {
-            case 'I':
-                if (i!=n-1 && s[i+1]!='I'){
-                    // minus case for 4 and 9...
-                    res--;
-                }else{
-                    res++;
-                }
-                break;
-            case 'V':
-                res = res + 5;
-                break;
-            case 'X':
-                if (i!=n-1 && (s[i+1]=='L'||s[i+1]=='C')){
-                    // minus case for 4 and 9...
-                    res = res- 10;
-                }else{
-                    res = res + 10;
-                }
-                break;
-            case 'L':
-                res = res+50;
-                break;
-            case 'C':
-                if (i!=n-1 && (s[i+1]=='D'||s[i+1]=='M')){
-                    // minus case for 4 and 9...
-                    res = res- 100;
-                }else{
-                    res = res + 100;
-                }
-                break;
-            case 'D':
-                res = res+500;
-                break;
-            case 'M':
-                res = res+1000;
+        unordered_map<char, int> m;
+        
+        m['I'] = 1;
+        m['V'] = 5;
+        m['X'] = 10;
+        m['L'] = 50;
+        m['C'] = 100;
+        m['D'] = 500;
+        m['M'] = 1000;
+        
+        int ans = 0;
+        
+        for(int i = 0; i < s.length(); i++){
+            if(m[s[i]] < m[s[i+1]]){
+                ans -= m[s[i]];
+            }
+            else{
+                ans += m[s[i]];
             }
         }
-        return res;
+        return ans;
     }
 };

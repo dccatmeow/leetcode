@@ -32,27 +32,30 @@ Explanation: 3 is represented as 3 ones.
 class Solution {
 public:
     string intToRoman(int num) {
-        int tmp = num;
-        vector<int> div{1000,500,100,50,10,5,1};
-        string key = "MDCLXVI";
         string res;
+        string key="MDCLXVI";
+        vector<int> div{1000,500,100,50,10,5,1};
         for (int i=0; i<div.size();i=i+2){
-            int p = tmp/div[i];
-            if (p==9){
-                res = res+key[i]+key[i-2];
-                p=0;
-            }else if (p==4){
+            int tmp = num/div[i];
+            num = num%div[i];
+            if (tmp==0){
+                continue;
+            }else if (tmp>0&& tmp<4){
+                for (int j=0;j<tmp;++j){
+                    res = res+key[i];
+                }
+            }else if (tmp==4){ // num<3999
                 res = res+key[i]+key[i-1];
-                p=0;
-            }else if (p>=5){
+            }else if (tmp==5){
                 res = res+key[i-1];
-                p = p-5;
+            }else if (tmp>5 && tmp<9){
+                res = res+key[i-1];
+                 for (int j=0;j<tmp-5;++j){
+                    res = res+key[i];
+                }
+            }else if (tmp==9){
+                res = res+key[i]+key[i-2];
             }
-            while (p!=0){
-                res = res+key[i];
-                p--;
-            }
-            tmp = tmp%div[i];
         }
         return res;
     }

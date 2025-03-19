@@ -12,29 +12,31 @@ Input: s = "bbbbb"
 Output: 1
 Explanation: The answer is "b", with the length of 1.
 */
-
 class Solution {
 public:
     int lengthOfLongestSubstring(string s) {
-        unordered_map<char, int> visited;
-        int res(0), left(0);
-        for (int i=0; i<s.size(); ++i){
-            char c = s[i];
-            if (visited.count(c) && visited[c]!=-1){
-                // visited
-                res = max(res, i-left);
-                // reset element from left to visited[c]
-                for (int j = left; j<visited[c]; ++j){
-                    visited[s[j]] = -1;
+        int n = s.size();
+        if (n==0) return 0;
+        if (n==1) return 1;
+        int res=0;
+        unordered_map<char,int> m;
+        int l(0);
+        for (int i=0;i<n;++i){
+            if (m.find(s[i])!=m.end() && m[s[i]]!=-1){
+                res = max (res, i - l);
+                // invalid from l to tmp-1
+                // l....m[s[i]]....i
+                int tmp = m[s[i]];
+                for (int j=l;j<tmp;++j){
+                    m[s[j]] = -1;
                 }
-                left = visited[c]+1;
+                l = tmp+1;
             }
-            // store location of c
-            visited[c] = i;
+            m[s[i]] = i;
         }
-        // at the end check [left, s.size())
-        int tmp = s.size()-left;
-        res = max(res, tmp);
+        if (l!=n-1){
+            res = max(res, n-l);
+        }
         return res;
     }
 };

@@ -20,45 +20,29 @@ Constraints:
 class Solution {
 public:
     vector<string> generateParenthesis(int n) {
-        num=n*2;
-        string tmp;
-        bt(tmp);
+        num=n;
+        gen("", n, n);
         return res;
     }
-    
-    void bt(string& tmp){
-        if (tmp.size() == num){
-            if (isValid(tmp)){
-                res.push_back(tmp);
-            }
-            return;
-        }
-        // try 1
-        tmp.push_back('(');
-        bt(tmp);
-        tmp.pop_back();
-        // try 2
-        tmp.push_back(')');
-        bt(tmp);
-        tmp.pop_back();
-    }
-    
-    bool isValid(string& s){
-        int count(0);
-        for (auto e:s){
-            if (e == '('){
-                count++;
-            }else{
-                count--;
-            }
-            if (count<0){
-                return false;
-            }
-        }
-        if (count==0){
-            return true;
+    // open is the number of ( to be add
+    // close is the number of ) to be add
+    void gen(string s, int open, int close){
+        if (open==0 && close ==0){
+            res.push_back(s);
+        } else if (open>close){
+            // invalid
+        }else if (open==close){
+            s = s+'(';
+            open--;
+            gen(s, open,close);
+        }else if (open==0){
+            s = s+')';
+            close--;
+            gen(s,open,close);
         }else{
-            return false;
+            // open<close
+            gen(s+'(', open-1, close);
+            gen(s+')', open, close-1);
         }
     }
 private:

@@ -24,31 +24,24 @@ All the integers of nums are unique.
 
 class Solution {
 public:
+    vector<vector<int>> res;
+    int n;
     vector<vector<int>> permute(vector<int>& nums) {
-        // back track
-        vector<int> tmp;
-        permuteV(nums, tmp);
+        n=nums.size();
+        perm(nums, 0);
         return res;
     }
-    
-    void permuteV(vector<int>& nums, vector<int>& tmp){
-        if (tmp.size() == nums.size()){
-            res.push_back(tmp);
+    void perm(vector<int>& nums, int i){
+        if (i==n){
+            res.push_back(nums);
             return;
         }
-        for (auto i:nums){
-            auto it = find(tmp.begin(), tmp.end(), i);
-            if (it != tmp.end()){
-                continue;
-            }else{
-                tmp.push_back(i);
-                permuteV(nums, tmp);
-                tmp.pop_back();
-            }
+        for (int k=i; k<n;++k){
+            swap(nums[i], nums[k]);
+            perm(nums, i+1);
+            swap(nums[i], nums[k]);
         }
     }
-private:
-    vector<vector<int>> res;
 };
 // time complexity O(n^2)
 // space complexity O(n)

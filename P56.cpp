@@ -9,39 +9,30 @@ Input: intervals = [[1,3],[2,6],[8,10],[15,18]]
 Output: [[1,6],[8,10],[15,18]]
 Explanation: Since intervals [1,3] and [2,6] overlaps, merge them into [1,6].
 */
-
 class Solution {
 public:
     vector<vector<int>> merge(vector<vector<int>>& intervals) {
-        if (intervals.size() == 1){
-            return intervals;
-        }
-        // comparator sort from small to large
-        // if first element is identical, then sort second element from large to small
-        auto comp=[](vector<int>& v1, vector<int>& v2){
-            if (v1[0] == v2[0]){
-                return v1[1]>v2[1];
+        vector<vector<int>> res;
+        auto comp = [](vector<int>& v1, vector<int>& v2){
+            if (v1[0]==v2[0]){
+                return v1[1]<v2[1];
             }
             return v1[0]<v2[0];
         };
+        // sort the vector based on first element nlogn
         sort(intervals.begin(), intervals.end(), comp);
-        vector<vector<int>> res;
-        vector<int> tmp = intervals[0];
-        for (auto v:intervals){
-            if (tmp == v){
-                // first element
-                continue;
-            }
-            if (tmp[1]>=v[0]){
-                // overlap, merge
-                tmp[1] = max(tmp[1], v[1]);
-            }else{
-                //not overlap, push tmp to res
+        // merge overlap linear
+        auto tmp = intervals[0];
+        for (int i=1; i<intervals.size();++i){
+            if (intervals[i][0]>tmp[1]){
+                //non-overlap
                 res.push_back(tmp);
-                tmp = v;
+                tmp = intervals[i];
+            }else if (intervals[i][1]> tmp[1]){
+                // overlap and extend tmp
+                tmp[1] = intervals[i][1];
             }
         }
-        // push back last vector
         res.push_back(tmp);
         return res;
     }

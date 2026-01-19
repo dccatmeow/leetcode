@@ -20,66 +20,68 @@ Output: 2
 class Solution {
 public:
     int numSimilarGroups(vector<string>& strs) {
-        // union find
-        int n=strs.size();
-        // initialize parent vector
-        p = vector<int>(n, -1);
-        for (int i=0; i<n; ++i){
-            p[i] = i;
-        }
-        int res(n);
-        // union for all the pair of strs
-        for (int i=0; i<n; ++i){
-            for (int j=i+1; j<n; ++j){
-                if (isSameGroup(strs[i], strs[j])){
-                    if (Union(i, j)){
-                        // everytime union is made, one group less.
-                        res--;
-                    }
+        strsPtr = &strs;
+        int sz = strs.size();
+        parent.resize(sz);
+        // initialize parent
+        for (int i=0; i<sz;++i) parent[i] = i;
+        // compare all the elements in strs
+        for (int i=0;i<sz-1;++i){
+            for (int j=i+1;j<sz;++j){
+                if (isSimilar(strs[i], strs[j])){
+                    unite(i,j);
                 }
             }
         }
-        return res;
+        unordered_set<int> groups;
+        for (int i = 0; i < sz; i++) {
+            groups.insert(findP(i));
+        }
+        return groups.size();
     }
-    
-    bool isSameGroup(const string& s1, const string& s2){
-        // s1 and s2 are anagram, they all have same characters
-        // in different order
-        int cnt(0);
-        for (int i=0; i<s1.size(); ++i){
+    bool isSimilar(string& s1, string& s2){
+        // O(n)
+        int sz1 = s1.size();
+        int sz2 = s2.size();
+        if (sz1!=sz2) return false;
+        vector<int> pos;
+        for (int i=0;i<sz1;++i){
             if (s1[i]!=s2[i]){
-                cnt++;
+                pos.push_back(i);
             }
+            if (pos.size()>2) return false;
         }
-        if (cnt==2 || cnt ==0){
-            return true;
-        }
+        if (pos.empty()) return true;
+        if (pos.size()==2 && s1[pos[0]==s2[pos[1]]]) return true;
         return false;
     }
-    
-    bool Union(int i, int j){
-        int pi = findp(i);
-        int pj = findp(j);
-        if (pi != pj){
-            if (pi<pj){
-                p[pj] = pi;
-            }else{
-                p[pi] = pj;
-            }
-            return true;
-        }
-        // if no union action happened, return false
-        return false;
-    }
-    
-    int findp(int i){
-        int pi = p[i];
-        if (pi==i){
-            return i;
-        }else{
-            return findp(pi);
+    void unite(int s1, int s2){
+        int p1 = findP(s1);
+        int p2 = findP(s2);
+        if (p1<p2){
+            parent[p2] = p1;
+        }else if (p1>p2){
+            parent[p1] = p2;
         }
     }
+    int findP(int s){
+        if (parent[s]!=s){
+            parent[s] = findP(parent[s]);
+        }
+        return parent[s];
+    }
+    
 private:
-    vector<int> p;
+    vector<int> parent;
+    vector<string>* strsPtr;
 };
+/*
+Time
+Pair comparisons: O(N²)
+Similarity check: O(L)
+ Total: O(N² × L)
+
+ Space
+Union-Find parent array: O(N)
+Total: O(N)
+    */

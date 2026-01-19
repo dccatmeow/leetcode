@@ -21,56 +21,36 @@ To take course 1 you should have finished course 0, and to take course 0 you sho
 class Solution {
 public:
     bool canFinish(int numCourses, vector<vector<int>>& prerequisites) {
-        // use graph to traverse all the possible path
-        int n = prerequisites.size();
-        visited = vector<bool>(numCourses,false);
-        // create graph
-        for (auto v:prerequisites){
-            graph[v[1]].push_back(v[0]);
+        // this problem tries to find the circular dependency
+        vector<vector<int>> v(numCourses, vector<int>());
+        res = 0;
+        visited = vector<int>(numCourses, 0);
+        for (auto e:prerequisites){
+            int n0 = e[0];
+            int n1 = e[1];
+            v[n1].push_back(n0);
         }
-
-        // traverse from all the starting case for prerequisites
-        for(auto v:prerequisites){
-            if (!visited[v[1]]){
-                // use a path to track if there is a circle in path
-                vector<bool> path(numCourses, false);
-                if (traverse(prerequisites, v[1], path)){
-                    // find a circle
-                    return false;
-                };
+        for (int i=0; i<numCourses;++i){
+            if(visited[i]==0 && !dfs(v,i)){
+                return false;
             }
         }
         return true;
     }
-    
-    bool traverse(vector<vector<int>>& prerequisites, int i, vector<bool>& path){
-        // if there is a circle, return true, else false
-        visited[i] = true;
-        path[i] = true;
-        if (graph.count(i)){
-            // in the graph, loop through all the next level nodes
-            for (auto j:graph[i]){
-                if (path[j]){
-                    // find a circle on path
-                    return true;
-                }
-                if (!visited[j]){
-                    // only excercise non visited cases
-                    if(traverse(prerequisites, j, path)){
-                        return true;
-                    };
-                }
-            }
+    bool dfs(vector<vector<int>>& v, int i){
+        // flag
+        visited[i] = 1;
+        for (auto e:v[i]){
+            if (visited[e]==1) return false;
+            else if (visited[e]==2) continue;
+            if (!dfs(v,e)) return false;
         }
-        // now remove i from path as it finished search for current i
-        path[i] = false;
-        return false;
+        visited[i]=2;
+        return true;
     }
-    
 private:
-    unordered_map<int, vector<int>> graph;
-    vector<bool> visited;
+    vector<int> visited;
+    int res;
 };
-
-// time complexity O(numCourses)
-// space complexity O(numCourses)
+// time complexity O(numCourses+prerequisites)
+// space complexity O(numCourses+prerequisites)

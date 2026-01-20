@@ -24,40 +24,44 @@ You add 3 + 5 + 3 = 11 to your score.
 However, you must subtract abs(2 - 1) + abs(1 - 0) = 2 from your score.
 Your final score is 11 - 2 = 9.
 */
-
 class Solution {
 public:
-    long long maxPoints(vector<vector<int>>& points) {
-        int m = points.size();
-        int n = points[0].size();
-        // res is the maxium value it can get from first row to current row i at column j [i][j]
-        vector<long long> res(n,0);
-        vector<long long> tmp = res;
-        vector<long long> tmp1 = res;
-        for (int i=0; i<m; ++i){
-            // at row i, previous row is res
-            // linear scan from left, only look at element from left
-            // tmp stores the max value it can get
-            // res: 5   7             8                4
-            // tmp: 5 max(5-1,7)=7   max(7-1,8)=8   max(8-1,4)=7
-            tmp[0] = res[0];
-            for (int j=1; j<n; ++j){
-                tmp[j] = max(tmp[j-1]-1, res[j]);
-            }
-            // scan from right
-            tmp1[n-1] = res[n-1];
-            for (int j=n-2; j>=0; --j){
-                tmp1[j] = max(tmp1[j+1]-1, res[j]);
-            }
-            // find max from left and from right plus current element
-            for (int j = 0; j<n; ++j){
-                res[j] = max(tmp[j], tmp1[j])+points[i][j];
-            }
+long long maxPoints(vector<vector<int>>& points) {
+    int m = points.size();
+    int n = points[0].size();
+    vector<long long> dp(n), newDp(n);
+    
+    // initialize first row
+    for (int c = 0; c < n; c++) {
+        dp[c] = points[0][c];
+    }
+    
+    for (int r = 1; r < m; r++) {
+        vector<long long> left(n), right(n);
+        // dp[0], dp[1], dp[2],.... k
+        //          c
+        // left to right
+        // dp[k] - (c-k) = dp[k]+k - c
+        // calculate at c,max of above for all the k on the left
+        left[0] = dp[0]; // k=0
+        for (int c = 1; c < n; c++) {
+            left[c] = max(left[c-1], dp[c] + c);
         }
-        long long res_final(0);
-        for(auto i:res){
-            res_final = max(i, res_final);
+        // right to left
+        // dp[k] -(k-c) = dp[k]-k +c
+        right[n-1] = dp[n-1] - (n-1);
+        for (int c = n-2; c >= 0; c--) {
+            right[c] = max(right[c+1], dp[c] - c);
         }
-        return res_final;
+        // compute new dp
+        for (int c = 0; c < n; c++) {
+            newDp[c] = points[r][c] +
+            max(left[c] - c, right[c] + c);
+        }
+        dp.swap(newDp);
+    }
+    return *max_element(dp.begin(), dp.end());
     }
 };
+//Time complexity O(mxn)
+// space complexity O(n)

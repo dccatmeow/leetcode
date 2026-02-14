@@ -20,42 +20,38 @@ This gives the maximum AND sum of (1 AND 1) + (4 AND 1) + (2 AND 2) + (6 AND 2) 
 class Solution {
  public:
   int maximumANDSum(vector<int>& nums, int numSlots) {
-      // nums.size()<=2*numSlots
+      // each slot has 2 numbers
       const int n = 2 * numSlots;
-      // expand nums to n, now each slot should have exactly 2 numbers, there could be lots of 0
+      // expand nums to n, the rest are 0
       nums.resize(n);
-      
       // if n=4, 2 slots, nums = [1,2,3], add one 0
       //             nums = [1,2,3,0]
-      // bit mask looks like 1 1 1 1, 1 means to be placed
-      // the bit mask max value is 10000, 1 left shift by n
+      // max bit mask looks like 1 1 1 1, 1 means chosen
+      // less than 10000, 1 left shift by n
       const int nMax = 1 << n;
-      // **** dp is the max value it can get with a mask (have/not have certain element in nums)
+      // **** dp is the max value it can get with a mask 
       // dp[0] = 0, no element selected
       // dp[1], select nums[0]=1 mask =  0 0 0 1
       vector<int> dp(nMax);
       // starting from 0001 to 1111
-      // given mask representing the nums selection status
+      // mask includes all the possible selection till all selected
       for (int mask = 1; mask < nMax; ++mask) {
-          //__builtin_popcount(x): This function is used to count the number of 1’s(set bits) in an integer. 
+          //mask represents which NUMBERS are already chosen.
+          //__builtin_popcount(x): This function is used to count the number of 1’s(set bits)
           const int selected = __builtin_popcount(mask);
           // fill in from left to right, the slot to be filled is the last one with current mask
           const int slot = (selected + 1) / 2;  // (1, 2) -> 1, (3, 4) -> 2
           for (int i = 0; i < n; ++i){
               if (mask >> i & 1) {
-                  // if position i is filled
+                  // nums[i] is selected
                   // mask right shift i, if i==1 
-                  // 1100, i=2, 0011 & 0001 == 1
+                  // 1100, i=2, 0011 & 0001 == 0001
 
-                  // find when position i is not filled, dp+fill i position
-                  // slot & nums[i] is the AND result, add it to 
                   // flip ith position in mask 1 (1) 0 0
                   // 1 left shift by i, 0100
                   // mask(1100) XOR 0100 = 1000
 
-                  // “If the last number was placed at position i,
-                  // then the total score is:
-                  // best previous score + AND contribution.”
+                  // mask without choosing i last time and choose i this step
                   dp[mask] = max(dp[mask], dp[mask ^ 1 << i] + (slot & nums[i]));
               }
           }

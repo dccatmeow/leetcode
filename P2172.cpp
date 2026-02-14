@@ -43,12 +43,19 @@ class Solution {
           const int slot = (selected + 1) / 2;  // (1, 2) -> 1, (3, 4) -> 2
           for (int i = 0; i < n; ++i){
               if (mask >> i & 1) {
-                  // mask right shift i, if i==1 jump in
+                  // if position i is filled
+                  // mask right shift i, if i==1 
                   // 1100, i=2, 0011 & 0001 == 1
+
+                  // find when position i is not filled, dp+fill i position
                   // slot & nums[i] is the AND result, add it to 
                   // flip ith position in mask 1 (1) 0 0
                   // 1 left shift by i, 0100
                   // mask(1100) XOR 0100 = 1000
+
+                  // “If the last number was placed at position i,
+                  // then the total score is:
+                  // best previous score + AND contribution.”
                   dp[mask] = max(dp[mask], dp[mask ^ 1 << i] + (slot & nums[i]));
               }
           }

@@ -19,55 +19,76 @@ The use counter for a key in the cache is incremented either a get or put operat
 The functions get and put must each run in O(1) average time complexity.
 */
 class LFUCache {
-public:
-    LFUCache(int capacity) {
-        cap=capacity;
-        c=0;
-    }
-    
-    int get(int key) {
-        if (data.find(key)==data.end()){
-            return -1;
-        }else{
-            put(key, data[key]);
-            return data[key];
-        }
-    }
-    
-    void put(int key, int value) {
-        if (data.find(key)==data.end()){
-            // add new entry
-            if (c == cap){
-                int k = freq.begin()->second.front();
-                freq.begin()->second.pop_front();
-                data.erase(k);
-                m.erase(k);
-                c--;
-            }
-            c++;
-            freq[1].push_back(key);
-            auto iter = --freq[1].end();
-            m[key] = std::pair<int, list<int>::iterator> (1, iter);
-        }else{
-            // erase old entry
-            auto [f,iter] = m[key];
-            freq[f].erase(iter);
-            if (freq[f].empty()){
-                // remove empty key
-                freq.erase(f);
-            }
-            freq[f+1].push_back(key);
-            m[key] = std::pair<int, list<int>::iterator> (f+1, --freq[f+1].end());
-        }
-        data[key]=value;
-    }
 private:
-    map<int,list<int>> freq; // frequency, list of keys
-    unordered_map<int,int> data; // key value
-    unordered_map<int, std::pair<int, list<int>::iterator> > m; // key, frequency, iterator
-    int c;
-    int cap;
+    struct Node {
+        int value;
+        int freq;
+        list<int>::iterator it;
+    };
 
+    int capacity;
+    int minFreq;
+
+    // key -> {value, freq, iterator in freq list}
+    unordered_map<int, Node> keyMap;
+
+    // freq -> list of keys (LRU order within same frequency)
+    unordered_map<int, list<int>> freqMap;
+
+    void touch(int key) {
+        auto &node = keyMap[key];
+        int oldFreq = node.freq;
+        // Remove from old frequency list
+        freqMap[oldFreq].erase(node.it);
+        // Remove empty frequency list
+        if (freqMap[oldFreq].empty()) {
+            freqMap.erase(oldFreq);
+            if (minFreq == oldFreq)
+                minFreq++;
+        }
+        // Increase frequency
+        node.freq++;
+        // Add to new frequency list
+        freqMap[node.freq].push_back(key);
+        node.it = prev(freqMap[node.freq].end());
+    }
+
+public:
+    LFUCache(int capacity)
+        : capacity(capacity), minFreq(0) {}
+
+    int get(int key) {
+        if (keyMap.find(key) == keyMap.end()) return -1;
+        touch(key);
+        return keyMap[key].value;
+    }
+
+    void put(int key, int value) {
+        if (capacity == 0) return;
+        // Key already exists
+        if (keyMap.find(key) != keyMap.end()) {
+            keyMap[key].value = value;
+            touch(key);
+            return;
+        }
+        // Cache full: remove LFU
+        if (keyMap.size() == capacity) {
+            int oldKey = freqMap[minFreq].front();
+            freqMap[minFreq].pop_front();
+            if (freqMap[minFreq].empty())
+                freqMap.erase(minFreq);
+            keyMap.erase(oldKey);
+        }
+
+        // Insert new key with frequency 1
+        minFreq = 1;
+        freqMap[1].push_back(key);
+        Node node;
+        node.value = value;
+        node.freq = 1;
+        node.it = --(freqMap[1].end());
+        keyMap[key] = node;
+    }
 };
 
 /**

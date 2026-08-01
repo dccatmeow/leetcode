@@ -11,48 +11,66 @@ Input: s = "leetcode", wordDict = ["leet","code"]
 Output: true
 Explanation: Return true because "leetcode" can be segmented as "leet code".
 */
-
-struct TrieNode{
-    unordered_map<char, TrieNode*> children;
-    bool isWord; // label end of word
-    TrieNode(){
-        isWord = false;
-        children = unordered_map<char, TrieNode*>();
-    }
-};
-
 class Solution {
 public:
+    struct TrieNode {
+        unordered_map<char, TrieNode*> children;
+        bool isWord = false;
+    };
+
     bool wordBreak(string s, vector<string>& wordDict) {
-        // construct trie
-        auto root = new TrieNode();
-        for (auto& w:wordDict){
+        str = s;
+        root = new TrieNode();
+
+        // dp[start] represents whether the substring str[start ... end] can be completely segmented into words from wordDict
+        // -1 = unknown, 0 = false, 1 = true
+        dp.assign(s.size(), -1);
+
+        for (auto &elem : wordDict) {
             auto node = root;
-            for (auto c:w){
-                if (node->children.find(c)==node->children.end()){
+            for (char c : elem) {
+                if (node->children.find(c)==node->children.end())
                     node->children[c] = new TrieNode();
-                }
                 node = node->children[c];
             }
-            node->isWord = true;// label end of word
+            node->isWord = true;
         }
-        int n=s.size();
-        vector<bool> dp(n,false);
-        for (int i=0; i<n; ++i){
-            // starting from i to find the word
-            if (i==0 || dp[i-1]){
-                // update dp for found word
-                auto node = root;
-                int j=i;
-                while(j<n && node->children.find(s[j]) != node->children.end()){
-                    node = node->children[s[j]]; 
-                    if (node->isWord){
-                        dp[j] = true;
-                    }
-                    j++;
+        return findInWordDict(0);
+    }
+
+    bool findInWordDict(int start) {
+        // last element passed
+        if (start == str.size())
+            return true;
+        // visited
+        if (dp[start] != -1) {
+            if (dp[start] == 1)
+                return true;
+            else
+                return false;
+        }
+        auto node = root;
+        for (int i = start; i < str.size(); i++) {
+            if (node->children.find(str[i]) == node->children.end()) {
+                break;
+            }
+            node = node->children[str[i]];
+            if (node->isWord) {
+                // from root search s[i+1]
+                if (findInWordDict(i + 1)) {
+                    // all words i+1 to end is found in dictionary
+                    // [start,i] is already a word
+                    dp[start] = 1;
+                    return true;
                 }
             }
         }
-        return dp[n-1];
+        dp[start] = 0; // cannot find all words in dictionary in [start, s_end]
+        return false;
     }
+
+private:
+    TrieNode *root;
+    string str;
+    vector<int> dp;
 };

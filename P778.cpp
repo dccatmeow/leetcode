@@ -15,37 +15,36 @@ You cannot go anywhere else because 4-directionally adjacent neighbors have a hi
 You cannot reach point (1, 1) until time 3.
 When the depth of water is 3, we can swim anywhere inside the grid.
 */
-
 class Solution {
 public:
     int swimInWater(vector<vector<int>>& grid) {
-        // Dijkistra
-        auto comp=[](const vector<int>& v1, const vector<int>& v2){
-            return v1[0]>v2[0];
-        };
-        // vector {maxtime need for water to arrive [x,y], x, y}
-        priority_queue<vector<int>, vector<vector<int>>, decltype(comp)> q(comp);
-        q.push(vector<int>{grid[0][0],0,0});
-        std::vector<std::pair<int,int>> diff{{0,1},{1,0},{-1,0},{0,-1}};
-        int m = grid.size(); //square
-        vector<vector<bool>> visited(m, vector<bool>(m, false));
-        while(!q.empty()){
-            auto v = q.top();
-            q.pop();
-            if (v[1]==m-1&&v[2]==m-1){
-                return v[0];
+
+        priority_queue<vector<int>, vector<vector<int>>, greater<vector<int>>> pq; // store val,i,j for grid[i][j]
+        int n=grid.size();
+        int res(0);
+        auto visited = vector<vector<int>>(n,vector<int>(n,false));
+        vector<std::pair<int,int>> direction{{1,0},{0,1},{-1,0},{0,-1}};
+        pq.push({grid[0][0],0,0});
+        visited[0][0] = true;
+        while(!pq.empty()){
+            auto v = pq.top();
+            pq.pop();
+            int val = v[0];
+            int i=v[1];
+            int j=v[2];
+            res = max(res,val);
+            if (i==n-1 && j==n-1){
+                return res;
             }
-            
-            visited[v[1]][v[2]] = true;
-            for (auto [i,j]:diff){
-                i += v[1];
-                j+=v[2];
-                if (i>=0 && j>=0 && i<m && j<m && !visited[i][j]){
-                    // the max time the route needed is maxtime(next location, current location)
-                    q.push(vector<int>{max(grid[i][j],v[0]), i, j});
+            for (auto[p,q]:direction){
+                p+=i;
+                q+=j;
+                if (p>=0&&p<n&&q>=0&&q<n&& !visited[p][q]){
+                    pq.push({grid[p][q],p,q});
+                    visited[p][q] = true;
                 }
             }
         }
-        return grid[0][0];
+        return res;
     }
 };

@@ -8,51 +8,25 @@ If there is no such route, return -1.
 
 class Solution {
 public:
-int findCheapestPrice(int n, std::vector<std::vector<int>>& flights,
-                       int src, int dst, int K) {
-
-     int graph[n][n];
-     memset(graph, 0, sizeof(graph));
-     for (auto const& f : flights) {
-         graph[f[0]][f[1]] = f[2];
-     }
-
-     // minimal cost from source to each node
-     int minCost[n];
-     std::fill(minCost, minCost+n, INT_MAX);
-
-     // cost to source node from source node is 0
-     auto q = std::queue<std::pair<int,int>>();
-     q.push({src,0});
-     minCost[src] = 0;
-
-     // perform K+1 BFS propogration
-     for (int i=0; i<=K; ++i) {
-         int const m = q.size();
-         if (m == 0) {
-             break;
-         }
-
-         for (int j=0; j<m; ++j) {
-             auto p = q.front();
-             q.pop();
-             for (int k=0; k<n; ++k) {
-                 // if there is a flight from current city to city k
-                 if (graph[p.first][k]) {
-                     int newCost = p.second + graph[p.first][k];
-                     if (k == dst) {
-                         minCost[k] = std::min(minCost[k], newCost);
-                     } else if (minCost[k] > newCost) {
-                         // only push it to queue if we arrive city k
-                         // with a lower cost from source city
-                         q.push({k, newCost});
-                         minCost[k] = newCost;
-                     }
-                 }
-             }
-         }
-     }
-
-     return minCost[dst] == INT_MAX ? -1 : minCost[dst];
- }
+    int findCheapestPrice(int n, vector<vector<int>>& flights, int src, int dst, int k) {
+        // Bellman-Ford method
+        vector<int> mem(n, 1e9);
+        mem[src]=0;
+        for (int i=0;i<k+1;++i){
+            auto tmp = mem;
+            for (auto& v:flights){
+                int start = v[0];
+                int term = v[1];
+                int c = v[2];
+                if (mem[start]!=1e9){
+                    // update end stop in tmp, using start from mem. this round always using mem for start, then update term in tmp
+                    tmp[term] = min(tmp[term], mem[start]+c);
+                }
+            }
+            mem = tmp;
+        }
+        return mem[dst]==1e9? -1: mem[dst];
+    }
 };
+// Time Complexity O(km)
+// Space Complexity O(n)

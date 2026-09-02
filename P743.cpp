@@ -13,6 +13,37 @@ Input: times = [[2,1,1],[2,3,1],[3,4,1]], n = 4, k = 2
 Output: 2
 */
 
+class Solution {
+public:
+    int networkDelayTime(vector<vector<int>>& times, int n, int k) {
+        // Bellman-Ford methods
+        vector<int> mem(n+1, INT_MAX);
+        mem[k]=0;
+        // n ndoe, n-1 edge/iterations
+        for (int i=0;i<n-1;++i){
+            auto tmp = mem;
+            for (auto& v:times){
+                int start = v[0];
+                int term = v[1];
+                int cost = v[2];
+                if (mem[start]!=INT_MAX){
+                    tmp[term] = min(tmp[term], mem[start]+cost);
+                }
+            }
+            mem = tmp;
+        }
+        int res(0);
+        for (int i=1;i<=n;++i){
+            if (mem[i]==INT_MAX) return -1; // some node not visited
+            res = max(res, mem[i]);
+        }
+        return res;
+    }
+};
+// Time Complexity O(n*edge)
+// Space Complexity O(n)
+
+
 // Dijkstra
 class Solution {
 public:

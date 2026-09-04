@@ -16,6 +16,35 @@ Otherwise, drop the egg from floor 2. If it breaks, we know that f = 1.
 If it does not break, then we know f = 2.
 Hence, we need at minimum 2 moves to determine with certainty what the value of f is.
 */
+class Solution {
+public:
+    int superEggDrop(int k, int n) {
+        // k eggs n floor
+        // dp[m][e] =
+        // maximum number of floors we can determine
+        // with m moves and e eggs.
+        // ​​​​dp[m][e] = dp[m-1][k-1]+1+dp[m-1][k]
+        vector<vector<long long>> dp(n + 1,
+                                    vector<long long>(k + 1, 0));
+
+        int moves = 0;
+
+        while (dp[moves][k] < n) {
+            moves++;
+
+            for (int eggs = 1; eggs <= k; eggs++) {
+                dp[moves][eggs] =
+                    dp[moves - 1][eggs - 1] +
+                    1 +
+                    dp[moves - 1][eggs];
+            }
+        }
+
+        return moves;
+    }
+};
+// Time Complexity O(k*m) O(klogn)
+// Space Complexity O(n) if simplify to 1D dp
 
 class Solution {
 public:

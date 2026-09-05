@@ -1,49 +1,54 @@
 class MyHashMap {
-public:
-    // use vector for key matching and use linked list to resolve collision of keys 
-    /** Initialize your data structure here. */
-    MyHashMap() {
-        data.resize(1009);
+private:
+    vector<vector<pair<int, int>>> buckets;
+
+    int hash(int key) {
+        return key % SIZE;
     }
-    
-    /** value will always be non-negative. */
+
+public:
+    MyHashMap() {
+        buckets.resize(1000);
+    }
+
     void put(int key, int value) {
-        int hashVal = key%1009;
-        auto& lst = data[hashVal];
-        for(auto& it:lst){
-            if(it.first == key){
-                it.second = value;
+        int index = hash(key);
+
+        for (auto& [k, v] : buckets[index]) {
+            if (k == key) {
+                v = value;   // update existing key
                 return;
             }
         }
-        lst.push_back(std::pair<int,int>(key,value));
+
+        buckets[index].push_back({key, value});
     }
-    
-    /** Returns the value to which the specified key is mapped, or -1 if this map contains no mapping for the key */
+
     int get(int key) {
-        int hashVal = key%1009;
-        auto& lst = data[hashVal];
-        for(auto& it:lst){
-            if(it.first == key){
-                return it.second;
+        int index = hash(key);
+
+        for (auto& [k, v] : buckets[index]) {
+            if (k == key) {
+                return v;
             }
         }
+
         return -1;
     }
-    
-    /** Removes the mapping of the specified value key if this map contains a mapping for the key */
+
     void remove(int key) {
-        int hashVal = key%1009;
-        auto& lst = data[hashVal];
-        for(auto it=lst.begin(); it!=lst.end(); ++it){
-            if(it->first == key){
-                lst.erase(it);
+        int index = hash(key);
+
+        for (auto it = buckets[index].begin();
+             it != buckets[index].end();
+             ++it) {
+
+            if (it->first == key) {
+                buckets[index].erase(it);
                 return;
             }
         }
     }
-    private:
-    std::vector<std::list<std::pair<int,int>>> data;
 };
 
 /**

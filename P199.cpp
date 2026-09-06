@@ -1,4 +1,5 @@
 /**
+199. Binary Tree Right Side View
  * Definition for a binary tree node.
  * struct TreeNode {
  *     int val;
@@ -11,25 +12,26 @@
  */
 class Solution {
 public:
-    void recursive(TreeNode* root, int level, vector<int>& res){
-        if(root==NULL){
+    vector<int> result;
+
+    void dfs(TreeNode* node, int depth) {
+        if (node == nullptr) {
             return;
         }
-        if(level>res.size()){
-            // after looping through most right branches, this check makes sure that right branch of left children only save to res if there is no most right branch in the existing result.
-            res.push_back(root->val);
+
+        // First node we encounter at this depth
+        if (depth == result.size()) {
+            result.push_back(node->val);
         }
-        // check most right branches first, this avoid other element pushed into res on the same level
-        recursive(root->right, level+1, res);
-        recursive(root->left, level+1, res);
-        
-        
+
+        dfs(node->right, depth + 1);
+        dfs(node->left, depth + 1);
     }
-        
+
     vector<int> rightSideView(TreeNode* root) {
-        // construct tree 
-        vector<int> res;
-        recursive(root, 1, res);
-        return res;
+        dfs(root, 0);
+        return result;
     }
 };
+// Time Complexity O(n)
+// Space Complexity O(n)
